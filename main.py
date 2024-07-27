@@ -4,9 +4,7 @@ from typing import List
 import json
 import logging
 
-
 app = FastAPI()
-
 
 models = [
   "VGG-Face", 
@@ -23,24 +21,19 @@ models = [
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Server is running..."}
 
-@app.get("/match")
+@app.get("/match", tags=["Face Match"])
 async def isMatch(input_url: str, check_url: str):
+    """
+    This function checks if two pictures are the same person
+    """
     result = DeepFace.verify(
       img1_path = input_url,
       img2_path = check_url,
       model_name = models[5],
     )
-    """
-    {
-    img1: "brad01",
-    img2: "jason01",
-    }
-    """
     return {"result": result}
-
-bucket_name = "criminal-db-73ba9.appspot.com"
 
 # Function to load URLs from a JSON file
 def load_urls():
@@ -48,12 +41,11 @@ def load_urls():
         data = json.load(file)
     return data["images"]
 
-def get_urls():
-    urls = load_urls()
-    print(urls)
-
-@app.get("/match/", tags=["URLs"])
+@app.get("/find", tags=["Database Searching"])
 def match(input:str):
+    """
+    This function checks for if a face exists in the database
+    """
     urls = load_urls()
     for image in urls:
       result = DeepFace.verify(
@@ -66,18 +58,35 @@ def match(input:str):
       logging.info("match not found")
     return {"message": "Processed all URLs, person not found"}
 
-@app.get("/images/", response_model=List[str])
+
+@app.get("/images")
 def list_images():
     """
     Gets all the images in the database as an a json
     """
     urls = load_urls()
     return {"images": urls }
+
+@app.get("/tests")
+def run_tests():
+    for model in models:
+        print(model)
     
-@app.get("/find")
-async def findInDB(image_path: str):
-  dfs = DeepFace.find(
-    img_path = image_path, 
-    db_path = "faces",
-  )
-  return {"result": dfs}
+"""
+Testing and model evaluations:
+
+Models:
+1. x
+2. y
+3. z
+
+Testing Data:
+16 - Innocent People (False)
+8 - Criminals Std
+8 - Criminals variance
+
+For each model, 
+  For each image in testing, we will search for a match
+    if it correctly matched, we will score it.
+
+"""
