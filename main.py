@@ -119,7 +119,7 @@ def run_tests():
                         try:
                             # Measure inference time
                             start_time = time.time()
-                            result = DeepFace.verify(f"testing/{test_image}", f"faces/{db_image}")
+                            result = DeepFace.verify(f"testing/{test_image}", f"faces/{db_image}", model_name = model)
                             inf_time = time.time() - start_time
                             # Add additional information
                             extended_result = {
